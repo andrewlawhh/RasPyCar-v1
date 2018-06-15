@@ -36,7 +36,7 @@ After N generations, terminate the simulation and save the best performing neura
 '''
 
 # Driver for NEAT algorithm
-def evolutionary_driver(n=50):
+def evolutionary_driver(n=100):
     # Load configuration.
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
@@ -83,10 +83,10 @@ def eval_genomes(genomes, config):
         distance = result['distance'] # dist to waypoint
         steps = result['steps'] # steps taken
 
-        fitness = 1 / (distance ** 2) + 1 / (steps ** 2) # TODO - figure out some combination of distance and steps
+        fitness = 1 / ((distance//50 + 1) ** 2) # TODO - figure out some combination of distance and steps
 
         # set genome.fitness to the calculated fitness
-        genome.fitness = -1 if fitness == 0 else fitness
+        genome.fitness = fitness
 
         if highest_fitness < fitness:
             highest_fitness = fitness

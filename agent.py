@@ -39,6 +39,13 @@ class Unit:
         self.finish_info = ()
 
 
+    # What if the unit only knows where the waypoint is?
+    def get_move_control(self):
+        input = [self.get_input6()]
+        output = self.neural_network.activate(input)
+        move = output.index(max(output))
+        return move
+
     # Pass input through neural network and get move
     # Args : None | Returns : Int corresponding to move
     def get_move(self):
@@ -69,7 +76,7 @@ class Unit:
         # Get move from ouput (4 output nodes)
         # Move is the index with the maximum value
         move = output.index(max(output))
-        print(self.genome.key, move)
+        #print(self.genome.key, move)
         return move
 
     # Move unit
@@ -80,7 +87,8 @@ class Unit:
         # 1 : Left
         # 2 : Right
         # 3 : Stop
-        move_command = self.get_move()
+        # move_command = self.get_move()
+        move_command = self.get_move_control()
 
         # Implemented in this manner so that we can change what each command does
         if move_command == 0:
@@ -96,7 +104,7 @@ class Unit:
     # Move forward command
     # Args : None | Returns : None
     def move_forward(self):
-        print(self.genome.key, 'moved forward')
+        #print(self.genome.key, 'moved forward')
         if self.direction == 0:
             self.x_pos += sim_cfg.UNIT_SIZE
         if self.direction == 90:
@@ -109,22 +117,25 @@ class Unit:
     # Turn left command
     # Args : None | Returns : None
     def turn_left(self):
-        print(self.genome.key, 'turned left')
+        #print(self.genome.key, 'turned left')
         self.direction += 90
         self.direction %= 360
+        self.move_forward()
 
     # Turn right command
     # Args : None | Returns : None
     def turn_right(self):
-        print(self.genome.key, 'turned right')
+        #print(self.genome.key, 'turned right')
         self.direction -= 90
         self.direction %= 360
+        self.move_forward()
 
     # Stop command
     # Args : None | Returns : None
     def stop(self):
         # Do nothing
-        print(self.genome.key, 'stopped')
+        #print(self.genome.key, 'stopped')
+        pass
 
     # Updates unit. (Move, but with checks to see if the unit has died or reached goal)
     # Args : None | Returns : None
@@ -156,7 +167,8 @@ class Unit:
     def check_dead(self):
         # Die if unit crashed into an obstacle
         for obstacle in self.obstacles:
-            if self.dist(self.x_pos, self.y_pos, obstacle.x_pos, obstacle.y_pos) <= 10: # TODO - Revise this
+            if obstacle.x_pos <= self.x_pos < obstacle.x_pos + obstacle.width and \
+                obstacle.y_pos <= self.y_pos < obstacle.y_pos + obstacle.height:
                 self.die()
         # Die if unit is not within borders of the simulation
         if self.x_pos <= 0 or self.x_pos >= sim_cfg.SCREEN_WIDTH or self.y_pos <= 0 or self.y_pos >= sim_cfg.SCREEN_HEIGHT:
@@ -166,10 +178,12 @@ class Unit:
         if self.steps > 100:
             self.die()
 
+    # Method called to kill the unit
     def die(self):
         self.dead = True
         self.set_finish_info()
 
+    # Method called if the unit reaches the waypoint
     def succeed(self):
         self.reached_waypoint = True
         self.set_finish_info()
@@ -182,9 +196,13 @@ class Unit:
         if self.waypoint_dist() < 5:
             self.succeed()
 
+
+    # Populate finish info with the tuple of (dictionary (result) , genome)
+    def set_finish_info(self):
+        self.finish_info = {'distance': self.waypoint_dist(), 'steps': self.steps}, self.genome
+
     '''
-    Inputs are currently random so I can debug the architecture of the simulation.
-    After the simulation starts working we can tweak the numbers.
+    Warning - Inputs are going to be written in extremely inelegant fashion
     '''
 
     # Return reading from left sensor
@@ -218,6 +236,4 @@ class Unit:
     def get_input6(self):
         return self.waypoint_dist()
 
-    # Populate finish info with the tuple of (dictionary (result) , genome)
-    def set_finish_info(self):
-        self.finish_info = {'distance': self.waypoint_dist(), 'steps': self.steps}, self.genome
+

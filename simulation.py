@@ -30,12 +30,11 @@ class Simulation:
                     pygame.quit()
                     quit()
 
-            time.sleep(0.01)
             if self.finished():
-                print('generation finished')
+                #print('generation finished')
                 return
             else:
-                print(20 * '*')
+                #print(20 * '*')
                 self.update_agents()
                 self.render_next_frame()
 
@@ -62,7 +61,7 @@ class Simulation:
 
     # Displays the next frame to the screen
     def render_next_frame(self):
-        print("rendering next frame")
+        #print("rendering next frame")
 
         # Draw background (fill with white)
         SCREEN.fill(WHITE)
@@ -87,7 +86,7 @@ class Simulation:
 
     # Draw grid
     def draw_grid(self):
-        print('drawing grid')
+        #print('drawing grid')
         # Draw horizontal lines
         y = 0
         while y < SCREEN_HEIGHT:
@@ -106,21 +105,21 @@ class Simulation:
 
     # Draw agents
     def draw_agents(self):
-        print('drawing agents')
+        #print('drawing agents')
         for agent in self.agents:
             agent_rect = pygame.Rect(agent.x_pos, agent.y_pos, UNIT_SIZE, UNIT_SIZE)
             pygame.draw.rect(SCREEN, BLACK, agent_rect)
 
     # Draw obstacles
     def draw_obstacles(self):
-        print('drawing obstacles')
+        #print('drawing obstacles')
         for obstacle in self.obstacles:
             obstacle_rect = pygame.Rect(obstacle.x_pos, obstacle.y_pos, obstacle.width, obstacle.height)
             pygame.draw.rect(SCREEN, RED, obstacle_rect)
 
     # Draw waypoint
     def draw_waypoint(self):
-        print('drawing waypoint')
+        #print('drawing waypoint')
         waypoint_rect = pygame.Rect(self.waypoint.x_pos, self.waypoint.y_pos, UNIT_SIZE, UNIT_SIZE)
         pygame.draw.rect(SCREEN, GREEN, waypoint_rect)
 

@@ -1,6 +1,7 @@
 import pickle
 import neat
 from simulation import Simulation
+from simulation_config import *
 
 '''
 Summary: 
@@ -36,7 +37,7 @@ After N generations, terminate the simulation and save the best performing neura
 '''
 
 # Driver for NEAT algorithm
-def evolutionary_driver(n=100):
+def evolutionary_driver(n=NUM_GENERATIONS):
     # Load configuration.
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
@@ -79,14 +80,15 @@ def eval_genomes(genomes, config):
 
     for tup in info:
         result, genome = tup
-        distance = result['distance'] # dist to waypoint
+        distance = result['distance']
+        # dist to waypoint
         steps = result['steps'] # steps taken
         succeeded = result['succeeded']
 
         if succeeded:
             fitness = 100 + 1 / (steps ** 2)
         else:
-            fitness = 1 / ((distance + 0.1) ** 2) + 1 / (steps ** 2) # TODO - figure out some combination of distance and steps
+            fitness = 1 / (distance ** 2)
 
         # set genome.fitness to the calculated fitness
         genome.fitness = fitness

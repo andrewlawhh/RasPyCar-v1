@@ -43,7 +43,13 @@ class Unit:
     # Debugging method
     # What if the unit only knows where the waypoint is?
     def get_move_control(self):
-        input = [self.get_input6()]
+        input = [self.waypoint_dist_x(), self.waypoint_dist_y(), self.direction]
+        def normalize(tpl):
+            l = list(tpl)
+            maximum = max([abs(x) for x in l])
+            normalized_l = [x/maximum for x in l]
+            return tuple(normalized_l)
+        input = normalize(input)
         output = self.neural_network.activate(input)
         move = output.index(max(output))
         return move
@@ -58,7 +64,8 @@ class Unit:
                  self.get_input3(),
                  self.get_input4(),
                  self.get_input5(),
-                 self.get_input6()
+                 self.waypoint_dist_x(),
+                 self.waypoint_dist_y()
         )
 
         # Non destructive normalize function
@@ -126,14 +133,14 @@ class Unit:
     def turn_left(self):
         #print(self.genome.key, 'turned left')
         self.direction = (self.direction - 1) % 4
-        self.move_forward()
+        #self.move_forward()
 
     # Turn right command
     # Args : None | Returns : None
     def turn_right(self):
         #print(self.genome.key, 'turned right')
         self.direction = (self.direction + 1) % 4
-        self.move_forward()
+        #self.move_forward()
 
     # Stop command
     # Args : None | Returns : None
@@ -165,6 +172,14 @@ class Unit:
     def waypoint_dist(self):
         return self.dist(self.x_pos, self.y_pos, self.waypoint.x_pos, self.waypoint.y_pos)
 
+    # Returns x distance from waypoint
+    def waypoint_dist_x(self):
+        return self.waypoint.x_pos - self.x_pos
+
+    # Returns y distance from waypoint
+    def waypoint_dist_y(self):
+        return self.waypoint.y_pos - self.y_pos
+
     # Checks if unit has crashed and assigns correct boolean to instance attribute
     # If it is dead, assign crash info to instance variable to be passed to simulation.py
     # Make sure the assignment happens only ONCE, when the unit has just died.
@@ -176,11 +191,11 @@ class Unit:
                 obstacle.y_pos <= self.y_pos < obstacle.y_pos + obstacle.height:
                 self.die()
         # Die if unit is not within borders of the simulation
-        if self.x_pos <= 0 or self.x_pos >= sim_cfg.SCREEN_WIDTH or self.y_pos <= 0 or self.y_pos >= sim_cfg.SCREEN_HEIGHT:
+        if self.x_pos <= 0 or self.x_pos >= sim_cfg.SCREEN_WIDTH - sim_cfg.UNIT_SIZE or self.y_pos <= 0 or self.y_pos >= sim_cfg.SCREEN_HEIGHT - sim_cfg.UNIT_SIZE:
             self.die()
         # Die if unit is taking too long to reach the waypoint
         # This prevents the unit from spinning in circles
-        if self.steps > 150:
+        if self.steps > 250:
             self.die()
 
     # Method called to kill the unit
@@ -203,7 +218,7 @@ class Unit:
 
     # Populate finish info with the tuple of (dictionary (result) , genome)
     def set_finish_info(self):
-        self.finish_info = {'distance': self.waypoint_dist(),
+        self.finish_info = {'distance': self.waypoint_dist() // sim_cfg.UNIT_SIZE,
                             'steps': self.steps,
                             'succeeded' : self.reached_waypoint},\
                            self.genome
@@ -237,8 +252,3 @@ class Unit:
     # Args : None | Returns : double (distance)
     def get_input5(self):
         return random.randint(1,3)
-
-    # Return reading from waypoint sensor
-    # Args : None | Returns : double (distance to waypoint)
-    def get_input6(self):
-        return self.waypoint_dist()

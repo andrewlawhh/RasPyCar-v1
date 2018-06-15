@@ -23,14 +23,14 @@ class Simulation:
 
     # Main loop
     # Runs simulation for one generation
-    def run_simulation(self):
+    def run_simulation(self, slow_mode = False):
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     quit()
-
-            # time.sleep(.05)
+            if slow_mode:
+                time.sleep(.05)
             if self.finished():
                 #print('generation finished')
                 return

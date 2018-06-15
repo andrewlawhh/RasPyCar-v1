@@ -18,7 +18,7 @@ def run_winner():
     genome = pickle.load(open('winner.pkl', 'rb'))
 
     sim = Simulation([genome], config)
-    sim.run_simulation()
+    sim.run_simulation(slow_mode = True)
 
 
 def main():

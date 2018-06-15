@@ -13,7 +13,8 @@ All agents, obstacles, and waypoint will have access to this file
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
-GREEN = (0, 0, 255)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
 
 #Screen width and height should be a multiple of UNIT_SIZE
 UNIT_SIZE = 50
@@ -25,8 +26,8 @@ AGENT_INITIAL_Y = SCREEN_HEIGHT * 0.75
 
 NUM_OBSTACLES = 0
 
-WAYPOINT_X = SCREEN_WIDTH * 0.75
-WAYPOINT_Y = SCREEN_HEIGHT * 0.5
+WAYPOINT_X = SCREEN_WIDTH * 0.5
+WAYPOINT_Y = SCREEN_HEIGHT * 0.25
 
 def initialize_obstacles():
     obstacles = []

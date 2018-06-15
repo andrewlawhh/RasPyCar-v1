@@ -18,7 +18,7 @@ species_elitism      = 2
 [DefaultGenome]
 # node activation options
 activation_default      = relu
-activation_mutate_rate  = 0.025
+activation_mutate_rate  = 0
 activation_options      = sigmoid
 
 # node aggregation options
@@ -70,7 +70,7 @@ response_mutate_rate    = 0
 response_replace_rate   = 0
 
 # connection weight options
-weight_init_mean        = 0.0
+weight_init_mean        = 0.1
 weight_init_stdev       = 1.0
 weight_max_value        = 30
 weight_min_value        = -30

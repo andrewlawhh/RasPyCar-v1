@@ -2,6 +2,7 @@ import neat
 import random
 import simulation_config as sim_cfg
 
+dir_list = ['up', 'right', 'down', 'left']
 class Unit:
 
     def __init__(self, genome, config):
@@ -30,7 +31,7 @@ class Unit:
         self.genome = genome
 
         # Initialize direction in degrees
-        self.direction = 90 # Math.PI / 2
+        self.direction = 0 # Math.PI / 2
 
         # Initialize unit neural network
         self.neural_network = neat.nn.FeedForwardNetwork.create(genome, config)
@@ -39,6 +40,7 @@ class Unit:
         self.finish_info = ()
 
 
+    # Debugging method
     # What if the unit only knows where the waypoint is?
     def get_move_control(self):
         input = [self.get_input6()]
@@ -75,9 +77,14 @@ class Unit:
 
         # Get move from ouput (4 output nodes)
         # Move is the index with the maximum value
-        move = output.index(max(output))
-        #print(self.genome.key, move)
-        return move
+
+        output_sum = sum(output)
+        running_sum = 0
+        rando = random.random(output_sum)
+        for i in range(len(output)):
+            running_sum += output[i]
+            if running_sum > rando:
+                return i
 
     # Move unit
     # Args : None | Returns : None
@@ -87,7 +94,7 @@ class Unit:
         # 1 : Left
         # 2 : Right
         # 3 : Stop
-        # move_command = self.get_move()
+        #move_command = self.get_move()
         move_command = self.get_move_control()
 
         # Implemented in this manner so that we can change what each command does
@@ -105,36 +112,34 @@ class Unit:
     # Args : None | Returns : None
     def move_forward(self):
         #print(self.genome.key, 'moved forward')
-        if self.direction == 0:
+        if dir_list[self.direction] == 'right':
             self.x_pos += sim_cfg.UNIT_SIZE
-        if self.direction == 90:
+        if dir_list[self.direction] == 'up':
             self.y_pos -= sim_cfg.UNIT_SIZE
-        if self.direction == 180:
+        if dir_list[self.direction] == 'left':
             self.x_pos -= sim_cfg.UNIT_SIZE
-        if self.direction == 270:
+        if dir_list[self.direction] == 'down':
             self.y_pos += sim_cfg.UNIT_SIZE
 
     # Turn left command
     # Args : None | Returns : None
     def turn_left(self):
         #print(self.genome.key, 'turned left')
-        self.direction += 90
-        self.direction %= 360
+        self.direction = (self.direction - 1) % 4
         self.move_forward()
 
     # Turn right command
     # Args : None | Returns : None
     def turn_right(self):
         #print(self.genome.key, 'turned right')
-        self.direction -= 90
-        self.direction %= 360
+        self.direction = (self.direction + 1) % 4
         self.move_forward()
 
     # Stop command
     # Args : None | Returns : None
     def stop(self):
         # Do nothing
-        #print(self.genome.key, 'stopped')
+        print(self.genome.key, 'stopped')
         pass
 
     # Updates unit. (Move, but with checks to see if the unit has died or reached goal)
@@ -153,7 +158,7 @@ class Unit:
     # Returns distance between two points
     # Args : x1 coord, y1 coord, x2 coord, y2 coord | Returns : float
     def dist(self, x1, y1, x2, y2):
-        return (((x1 - x2) ** 2) + ((y1 - y2) ** 2)) ** 0.5
+        return ( ((x1 - x2) ** 2) + ((y1 - y2) ** 2) ) ** 0.5
 
     # Returns distance from agent to waypoint
     # Args : None | Returns : double (distance to waypoint)
@@ -175,7 +180,7 @@ class Unit:
             self.die()
         # Die if unit is taking too long to reach the waypoint
         # This prevents the unit from spinning in circles
-        if self.steps > 100:
+        if self.steps > 150:
             self.die()
 
     # Method called to kill the unit
@@ -196,10 +201,12 @@ class Unit:
         if self.waypoint_dist() < 5:
             self.succeed()
 
-
     # Populate finish info with the tuple of (dictionary (result) , genome)
     def set_finish_info(self):
-        self.finish_info = {'distance': self.waypoint_dist(), 'steps': self.steps}, self.genome
+        self.finish_info = {'distance': self.waypoint_dist(),
+                            'steps': self.steps,
+                            'succeeded' : self.reached_waypoint},\
+                           self.genome
 
     '''
     Warning - Inputs are going to be written in extremely inelegant fashion
@@ -235,5 +242,3 @@ class Unit:
     # Args : None | Returns : double (distance to waypoint)
     def get_input6(self):
         return self.waypoint_dist()
-
-

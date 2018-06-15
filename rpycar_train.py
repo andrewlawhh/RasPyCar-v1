@@ -78,12 +78,15 @@ def eval_genomes(genomes, config):
     # Genome is the genome of the unit
 
     for tup in info:
-        print(tup)
         result, genome = tup
         distance = result['distance'] # dist to waypoint
         steps = result['steps'] # steps taken
+        succeeded = result['succeeded']
 
-        fitness = 1 / ((distance//50 + 1) ** 2) # TODO - figure out some combination of distance and steps
+        if succeeded:
+            fitness = 100 + 1 / (steps ** 2)
+        else:
+            fitness = 1 / ((distance + 0.1) ** 2) + 1 / (steps ** 2) # TODO - figure out some combination of distance and steps
 
         # set genome.fitness to the calculated fitness
         genome.fitness = fitness

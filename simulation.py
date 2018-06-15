@@ -30,6 +30,7 @@ class Simulation:
                     pygame.quit()
                     quit()
 
+            # time.sleep(.05)
             if self.finished():
                 #print('generation finished')
                 return
@@ -107,8 +108,12 @@ class Simulation:
     def draw_agents(self):
         #print('drawing agents')
         for agent in self.agents:
+            if agent.reached_waypoint:
+                color = GREEN
+            else:
+                color = BLACK
             agent_rect = pygame.Rect(agent.x_pos, agent.y_pos, UNIT_SIZE, UNIT_SIZE)
-            pygame.draw.rect(SCREEN, BLACK, agent_rect)
+            pygame.draw.rect(SCREEN, color, agent_rect)
 
     # Draw obstacles
     def draw_obstacles(self):
@@ -120,8 +125,13 @@ class Simulation:
     # Draw waypoint
     def draw_waypoint(self):
         #print('drawing waypoint')
-        waypoint_rect = pygame.Rect(self.waypoint.x_pos, self.waypoint.y_pos, UNIT_SIZE, UNIT_SIZE)
-        pygame.draw.rect(SCREEN, GREEN, waypoint_rect)
+        #
+        # waypoint_rect = pygame.Rect(self.waypoint.x_pos, self.waypoint.y_pos, UNIT_SIZE, UNIT_SIZE)
+        # pygame.draw.rect(SCREEN, GREEN, waypoint_rect)
+        waypoint_rect = pygame.Surface((UNIT_SIZE, UNIT_SIZE))
+        waypoint_rect.set_alpha(128)
+        waypoint_rect.fill(BLUE)
+        SCREEN.blit(waypoint_rect, (self.waypoint.x_pos, self.waypoint.y_pos))
 
     # Draw stats
     def draw_stats(self):

@@ -16,7 +16,6 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 
-
 # Screen width and height should be a multiple of UNIT_SIZE
 
 # Width and Height in pygame dimensions
@@ -33,7 +32,7 @@ SCREEN_WIDTH = DIMENSIONS
 SCREEN_HEIGHT = DIMENSIONS
 
 # Num generations
-NUM_GENERATIONS = 150
+NUM_GENERATIONS = 200
 
 # Agent starting position
 AGENT_INITIAL_X = UNIT_SIZE * (NUM_UNITS // 2)
@@ -74,19 +73,7 @@ def rand_fourth_quadrant():
 # Randomize the location of the waypoint
 def randomize_waypoint(generation):
     global WAYPOINT
-
-    # Get random x and y coordinate according to generation
-    # if generation < NUM_GENERATIONS // 4:
-    #     rand_x, rand_y = rand_first_quadrant()
-    # elif NUM_GENERATIONS // 4 <= generation < NUM_GENERATIONS // 2:
-    #     rand_x, rand_y = rand_second_quadrant()
-    # elif NUM_GENERATIONS // 2 <= generation < 3 * NUM_GENERATIONS // 4:
-    #     rand_x, rand_y = rand_third_quadrant()
-    # else:
-    #     rand_x, rand_y = rand_fourth_quadrant()
-
     rand_x, rand_y = UNIT_SIZE * random.randint(1, NUM_UNITS - 2), UNIT_SIZE * random.randint(1, NUM_UNITS - 5)
-
     # If waypoint would be too close to agent, re randomize
     if abs(rand_x - AGENT_INITIAL_X) < NUM_UNITS // 4 * UNIT_SIZE and \
             abs(rand_y - AGENT_INITIAL_Y) < NUM_UNITS // 4 * UNIT_SIZE:

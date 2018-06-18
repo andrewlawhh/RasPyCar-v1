@@ -49,22 +49,30 @@ class Unit:
         # Initialize termination information
         self.finish_info = ()
 
+    '''
+    Movement methods
+    '''
+
     # Pass input through neural network and get move
     # Args : None | Returns : Int corresponding to move
     def get_move(self):
+        # Inputs to be fed into the neural network
         input = [self.waypoint_dist_x(),
                  self.waypoint_dist_y(),
                  self.direction]
 
+        # Normalization function for inputs to be converted to values in range [-1, 1]
         def normalize(tpl):
             l = list(tpl)
             maximum = max([abs(x) for x in l])
             normalized_l = [x/maximum for x in l]
             return tuple(normalized_l)
+
+        # Normalize inputs
         input = normalize(input)
+
+        # Get output from neural network
         output = self.neural_network.activate(input)
-        output_sum = sum(output)
-        running_sum = 0
 
         def prob_based():
             output_sum = sum(output)
@@ -148,6 +156,10 @@ class Unit:
             if not self.dead and not self.reached_waypoint:
                 self.move()
 
+    '''
+    Distance measurement methods
+    '''
+
     # Returns distance between two points
     # Args : x1 coord, y1 coord, x2 coord, y2 coord | Returns : float
     def dist(self, x1, y1, x2, y2):
@@ -169,6 +181,11 @@ class Unit:
     def waypoint_manhattan_dist(self):
         return (abs(self.waypoint_dist_x()) + abs(self.waypoint_dist_y()))
 
+
+    '''
+    Status checking methods
+    '''
+
     # Checks if unit has crashed and assigns correct boolean to instance attribute
     # If it is dead, assign crash info to instance variable to be passed to simulation.py
     # Make sure the assignment happens only ONCE, when the unit has just died.
@@ -187,6 +204,18 @@ class Unit:
         if self.steps > 150:
             self.die()
 
+    # Checks if unit has reached waypoint and assigns correct boolean to instance attribute
+    # If it has reached the waypoint, assign termination info to instance variable to be passed to simulation.py
+    # Make sure the assignment happens only ONCE, when the unit has just reached the waypoint.
+    # Args : None | Returns : None
+    def check_reached_waypoint(self):
+        if self.waypoint_dist() == 0:
+            self.succeed()
+
+    '''
+    Termination methods
+    '''
+
     # Method called to kill the unit
     def die(self):
         self.dead = True
@@ -197,14 +226,6 @@ class Unit:
         self.reached_waypoint = True
         self.set_finish_info()
 
-    # Checks if unit has reached waypoint and assigns correct boolean to instance attribute
-    # If it has reached the waypoint, assign termination info to instance variable to be passed to simulation.py
-    # Make sure the assignment happens only ONCE, when the unit has just reached the waypoint.
-    # Args : None | Returns : None
-    def check_reached_waypoint(self):
-        if self.waypoint_dist() == 0:
-            self.succeed()
-
     # Populate finish info with the tuple of (dictionary (result) , genome)
     def set_finish_info(self):
         self.finish_info = {'distance': self.waypoint_dist(),
@@ -214,7 +235,7 @@ class Unit:
                            self.genome
 
     '''
-    Warning - Inputs are going to be written in extremely inelegant fashion
+    Methods that take inputs from the environment
     '''
 
     # Return reading from left sensor

@@ -15,14 +15,13 @@ The simulation should include
     2. A waypoint
     3. Obstacles
 
-The visuals for the simulation will be handled by simulation.py
-
+The visuals for the simulation will be handled by pygame, in simulation.py
 
 PyGame configuration should be set up in a different file so all other classes can import that file and have access to
-locations.
+locations. This is written in simulation_config.py
 
-(Tentative) - Waypoint and Obstacle locations should be randomly generated in a different file, so the agent class has
-access to it
+During training, the waypoint and obstacles are randomly placed on the grid, while the agent remains at the 
+bottom of the screen
 
 Description of Evolution: 
 Each agent receives input from its environment, passes it through its neural network, and receives instructions from
@@ -36,6 +35,9 @@ config file.
 After N generations, terminate the simulation and save the best performing neural network.
 '''
 
+'''
+Main method - everything starts here
+'''
 # Driver for NEAT algorithm
 def evolutionary_driver(n=NUM_GENERATIONS):
     # Load configuration.
@@ -54,10 +56,12 @@ def evolutionary_driver(n=NUM_GENERATIONS):
     winner = p.run(eval_genomes, n = n)
 
     # save best genome to a file
-    pickle.dump(winner, open('winner.pkl', 'wb'))
-    print("Winner dumped into file")
+    pickle.dump(winner, open('prototype.pkl', 'wb'))
+    print(10*'*', "Winner dumped into file", 10*'*')
 
-
+'''
+Fitness function
+'''
 # Args: list of genomes, NEAT configuration
 # Return : None
 # Run simulation for one generation and assign fitness scores to each genome at the end of the generation
@@ -106,6 +110,7 @@ def eval_genomes(genomes, config):
         # set genome.fitness to the calculated fitness
         genome.fitness = fitness
 
+        # Find best metrics, for reporting purposes
         if highest_fitness < fitness:
             highest_fitness = fitness
 

@@ -21,6 +21,13 @@ class Unit:
         # Initialize waypoint reference
         self.waypoint = sim_cfg.WAYPOINT
 
+        # Initialize previous waypoint distances
+        self.waypoint_dist_x_prev = self.waypoint_dist_x()
+        self.waypoint_dist_y_prev = self.waypoint_dist_y()
+
+        # Initialize starting manhattan distance
+        self.starting_manhattan_distance = self.waypoint_manhattan_dist()
+
         # Set instance variable to save steps taken
         self.steps = 0
 
@@ -33,17 +40,22 @@ class Unit:
         # Initialize direction in degrees
         self.direction = 0 # Math.PI / 2
 
+        # Previous direction
+        self.direction_prev = 0
+
         # Initialize unit neural network
-        self.neural_network = neat.nn.FeedForwardNetwork.create(genome, config)
+        self.neural_network = neat.nn.RecurrentNetwork.create(genome, config)
 
         # Initialize termination information
         self.finish_info = ()
 
+    # Pass input through neural network and get move
+    # Args : None | Returns : Int corresponding to move
+    def get_move(self):
+        input = [self.waypoint_dist_x(),
+                 self.waypoint_dist_y(),
+                 self.direction]
 
-    # Debugging method
-    # What if the unit only knows where the waypoint is?
-    def get_move_control(self):
-        input = [self.waypoint_dist_x(), self.waypoint_dist_y(), self.direction]
         def normalize(tpl):
             l = list(tpl)
             maximum = max([abs(x) for x in l])
@@ -51,47 +63,22 @@ class Unit:
             return tuple(normalized_l)
         input = normalize(input)
         output = self.neural_network.activate(input)
-        move = output.index(max(output))
-        return move
-
-    # Pass input through neural network and get move
-    # Args : None | Returns : Int corresponding to move
-    def get_move(self):
-
-        # Get readings
-        input = (self.get_input1(),
-                 self.get_input2(),
-                 self.get_input3(),
-                 self.get_input4(),
-                 self.get_input5(),
-                 self.waypoint_dist_x(),
-                 self.waypoint_dist_y()
-        )
-
-        # Non destructive normalize function
-        # Args : tuple | Returns : tuple
-        def normalize(tpl):
-            l = list(tpl)
-            maximum = max(l)
-            normalized_l = [x/maximum for x in l]
-            return tuple(normalized_l)
-
-        # Normalized input
-        input = normalize(input)
-
-        # Feed input through ffw nn
-        output = self.neural_network.activate(input)
-
-        # Get move from ouput (4 output nodes)
-        # Move is the index with the maximum value
-
         output_sum = sum(output)
         running_sum = 0
-        rando = random.random(output_sum)
-        for i in range(len(output)):
-            running_sum += output[i]
-            if running_sum > rando:
-                return i
+
+        def prob_based():
+            output_sum = sum(output)
+            running_sum = 0
+            rando = random.uniform(0, output_sum)
+            for i in range(len(output)):
+                running_sum += output[i]
+                if running_sum > rando:
+                    return i
+
+        def max_based():
+            return output.index(max(output))
+
+        return max_based()
 
     # Move unit
     # Args : None | Returns : None
@@ -101,8 +88,7 @@ class Unit:
         # 1 : Left
         # 2 : Right
         # 3 : Stop
-        #move_command = self.get_move()
-        move_command = self.get_move_control()
+        move_command = self.get_move()
 
         # Implemented in this manner so that we can change what each command does
         if move_command == 0:
@@ -170,15 +156,18 @@ class Unit:
     # Returns distance from agent to waypoint
     # Args : None | Returns : double (distance to waypoint)
     def waypoint_dist(self):
-        return self.dist(self.x_pos, self.y_pos, self.waypoint.x_pos, self.waypoint.y_pos)
+        return self.dist(self.x_pos, self.y_pos, self.waypoint.x_pos, self.waypoint.y_pos) // sim_cfg.UNIT_SIZE
 
     # Returns x distance from waypoint
     def waypoint_dist_x(self):
-        return self.waypoint.x_pos - self.x_pos
+        return (self.waypoint.x_pos - self.x_pos) // sim_cfg.UNIT_SIZE
 
     # Returns y distance from waypoint
     def waypoint_dist_y(self):
-        return self.waypoint.y_pos - self.y_pos
+        return (self.waypoint.y_pos - self.y_pos) // sim_cfg.UNIT_SIZE
+
+    def waypoint_manhattan_dist(self):
+        return (abs(self.waypoint_dist_x()) + abs(self.waypoint_dist_y()))
 
     # Checks if unit has crashed and assigns correct boolean to instance attribute
     # If it is dead, assign crash info to instance variable to be passed to simulation.py
@@ -195,7 +184,7 @@ class Unit:
             self.die()
         # Die if unit is taking too long to reach the waypoint
         # This prevents the unit from spinning in circles
-        if self.steps > 250:
+        if self.steps > 150:
             self.die()
 
     # Method called to kill the unit
@@ -213,14 +202,15 @@ class Unit:
     # Make sure the assignment happens only ONCE, when the unit has just reached the waypoint.
     # Args : None | Returns : None
     def check_reached_waypoint(self):
-        if self.waypoint_dist() < 5:
+        if self.waypoint_dist() == 0:
             self.succeed()
 
     # Populate finish info with the tuple of (dictionary (result) , genome)
     def set_finish_info(self):
-        self.finish_info = {'distance': self.waypoint_dist() // sim_cfg.UNIT_SIZE,
+        self.finish_info = {'distance': self.waypoint_dist(),
                             'steps': self.steps,
-                            'succeeded' : self.reached_waypoint},\
+                            'succeeded' : self.reached_waypoint,
+                            'manhattan' : self.starting_manhattan_distance},\
                            self.genome
 
     '''

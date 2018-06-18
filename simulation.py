@@ -3,15 +3,22 @@ from agent import Unit
 from simulation_config import *
 import time
 
+
+
 class Simulation:
+    simulation_number = 0
 
     def __init__(self, genomes, config):
+        print('simulation number', Simulation.simulation_number)
+
         global SCREEN, FPSCLOCK
 
         pygame.init()
         FPSCLOCK = pygame.time.Clock()
         SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption('RPyCar Simulation PoC')
+
+        randomize_waypoint(Simulation.simulation_number)
 
         self.agents = [Unit(genome, config) for genome in genomes]
 
@@ -24,6 +31,7 @@ class Simulation:
     # Main loop
     # Runs simulation for one generation
     def run_simulation(self, slow_mode = False):
+
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
@@ -33,6 +41,7 @@ class Simulation:
                 time.sleep(.05)
             if self.finished():
                 #print('generation finished')
+                Simulation.simulation_number += 1
                 return
             else:
                 #print(20 * '*')

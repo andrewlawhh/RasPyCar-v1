@@ -7,8 +7,8 @@
 fitness_criterion      = max
 fitness_threshold      = 1
 no_fitness_termination = True
-pop_size               = 1000
-reset_on_extinction    = False
+pop_size               = 30
+reset_on_extinction    = True
 
 [DefaultStagnation]
 species_fitness_func = max
@@ -18,7 +18,7 @@ species_elitism      = 2
 [DefaultGenome]
 # node activation options
 activation_default      = relu
-activation_mutate_rate  = 0.01
+activation_mutate_rate  = 0.1
 activation_options      = sigmoid
 
 # node aggregation options
@@ -46,8 +46,8 @@ conn_delete_prob        = 0.5
 # connection enable options
 enabled_default         = True
 enabled_mutate_rate     = 0.1
-
-feed_forward            = True
+feed_forward            = False
+recurrent               = True
 initial_connection      = full
 
 # node add/remove rates

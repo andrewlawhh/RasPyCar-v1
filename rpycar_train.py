@@ -55,6 +55,7 @@ def evolutionary_driver(n=NUM_GENERATIONS):
 
     # save best genome to a file
     pickle.dump(winner, open('winner.pkl', 'wb'))
+    print("Winner dumped into file")
 
 
 # Args: list of genomes, NEAT configuration
@@ -80,14 +81,26 @@ def eval_genomes(genomes, config):
 
     for tup in info:
         result, genome = tup
+
+        # finishing distance to waypoint
         distance = result['distance']
-        # dist to waypoint
-        steps = result['steps'] # steps taken
+
+        # manhattan distance from starting position to waypoint
+        manhattan = result['manhattan']
+
+        # number of steps taken
+        steps = result['steps']
+
+        # succeeded? (true/false)
         succeeded = result['succeeded']
 
         if succeeded:
-            fitness = 100 + 1 / (steps ** 2)
+            # Normalize steps so that random paths to close waypoints are not inadvertently rewarded
+            normalized_steps = steps / manhattan
+            # Flat reward for reaching the waypoint plus an inversed square law for steps taken to get there
+            fitness = 100 + 1000 / (normalized_steps ** 2)
         else:
+            # Fitness = inverse square of ending distance to waypoint
             fitness = 1 / (distance ** 2)
 
         # set genome.fitness to the calculated fitness
@@ -105,6 +118,7 @@ def eval_genomes(genomes, config):
     # print metrics of the generation
     print('Highest Fitness :', highest_fitness)
     print('Lowest Distance :', lowest_distance)
+    print('Lowest Steps :', lowest_steps)
 
 def main():
     evolutionary_driver()

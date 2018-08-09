@@ -1,4 +1,4 @@
-# RasPyCar-v1
+# Proof of Concept Software for Autonomous Vehicle
 This is an example of the NEAT algorithm in action. Over several generations, agents will become better at locating a randomized target without using search algorithms.
 
 ### Customizing Settings
